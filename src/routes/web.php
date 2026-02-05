@@ -5,10 +5,12 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BriefController;
 use App\Http\Controllers\ClassesController;
 use App\Http\Controllers\CompetencesController;
+use App\Http\Controllers\EvaluationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SprintController;
 use App\Http\Controllers\StudentDashBoardController;
+use App\Http\Controllers\StudentEvalController;
 use App\Http\Controllers\TeacherDashboardController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
@@ -37,3 +39,7 @@ Route::get('//student/dashboard', [StudentDashBoardController::class, 'index'])-
 Route::post('/student/briefs/submit', [StudentDashBoardController::class, 'submit_brief'])->name('submit_brief')->middleware('student');
 
 Route::resource('/student/briefs', ProjectController::class)->middleware('student')->names('project');
+Route::resource('/teacher/evaluations', EvaluationController::class)->middleware('teacher')->names('evaluation');
+Route::get('/teacher/evaluate/{brief}/{student}', [EvaluationController::class, 'create'])
+    ->name('evaluation.create_custom');
+Route::get('/student/evaluations',[StudentEvalController::class,'index'])->name('student_eval')->middleware('student');

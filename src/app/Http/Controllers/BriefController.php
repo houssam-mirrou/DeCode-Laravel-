@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Brief;
 use App\Models\Competence;
 use App\Models\Sprint;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,8 +18,10 @@ class BriefController extends Controller
     public function index()
     {
         $competences = Competence::all();
-
-        $sprints = Sprint::with(['briefs.competences', 'briefs.teachers'])
+        $class_id = DB::table('teachers_in_classes')
+            ->where('teacher_id', Auth::id())
+            ->value('class_id');
+        $sprints = Sprint::where('class_id',$class_id)->with(['briefs.competences', 'briefs.teachers'])
             ->orderBy('start_date', 'asc')
             ->get();
         // dd($sprints);
@@ -111,29 +114,6 @@ class BriefController extends Controller
             'type' => $request->type,
             'sprint_id' => $request->sprint_id,
         ]);
-        $levelMap = [
-            1 => 'IMITER',
-            2 => 'S_ADAPTER',
-            3 => 'TRANSPOSER'
-        ];
-        $insertData = [];
-        if ($request->has('competences')) {
-            foreach ($request->competences as $id => $data) {
-
-                if (isset($data['checked'])) {
-                    $insertData[] = [
-                        'brief_id'      => $brief->id,
-                        'competence_id' => $id,
-                        'level'         => $levelMap[$data['level']] ?? 'IMITER',
-                    ];
-                }
-            }
-        }
-        // Sync competences
-        $brief->competences()->sync([]);
-        if (!empty($insertData)) {
-            DB::table('brief_competences')->insert($insertData);
-        }
         return redirect()->back()->with('success', 'Brief updated successfully.');
     }
 

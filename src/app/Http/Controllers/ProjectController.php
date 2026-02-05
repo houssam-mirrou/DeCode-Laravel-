@@ -69,7 +69,7 @@ class ProjectController extends Controller
     public function show(string $id)
     {
         $user = Auth::user();
-        $brief = \App\Models\Brief::with([
+        $brief = Brief::with([
             'competences',
 
             'livrables' => function ($query) use ($user) {
