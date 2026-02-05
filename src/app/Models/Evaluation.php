@@ -14,13 +14,12 @@ class Evaluation extends Model
 
     public function student()
     {
-        return $this->belongsTo(User::class,'student_id');
-
+        return $this->belongsTo(User::class, 'student_id');
     }
     public function competence_grades()
     {
         return $this->belongsToMany(Competence::class, 'evaluation_competences', 'evaluation_id', 'competence_id')
-                    ->withPivot('level');
+            ->withPivot('level');
     }
 
 }

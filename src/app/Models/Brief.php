@@ -33,4 +33,10 @@ class Brief extends Model
     {
         return $this->hasMany(Livrable::class,'brief_id');
     }
+
+
+    public function evaluations()
+    {
+        return $this->hasMany(Evaluation::class, 'brief_id');
+    }
 }

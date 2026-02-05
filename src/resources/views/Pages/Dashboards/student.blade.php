@@ -3,8 +3,12 @@
 @section('title', 'My Dashboard - Student')
 
 @section('content')
+
+    {{-- SIDEBAR WOULD GO HERE --}}
+
     <div class="flex-1 flex flex-col h-screen overflow-hidden relative z-0">
 
+        {{-- HEADER --}}
         <header
             class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200/60 flex items-center justify-between px-8 z-10 sticky top-0">
             <div>
@@ -14,7 +18,7 @@
             <div class="flex items-center gap-3">
                 <span
                     class="px-3 py-1 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-500 shadow-sm">
-                    {{ date('F j, Y') }}
+                    {{ now()->format('F j, Y') }}
                 </span>
             </div>
         </header>
@@ -22,9 +26,11 @@
         <main class="flex-1 overflow-y-auto p-8 bg-slate-50 scroll-smooth">
             <div class="max-w-7xl mx-auto space-y-10">
 
+                {{-- STATS GRID --}}
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {{-- Active Briefs --}}
                     <div
-                        class="bg-white p-6 rounded-2xl border border-slate-200 shadow-[0_4px_20px_rgb(0,0,0,0.03)] flex items-center gap-5 hover:-translate-y-1 transition-transform duration-300">
+                        class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-5 hover:-translate-y-1 transition-transform duration-300">
                         <div
                             class="w-14 h-14 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shadow-sm">
                             <i data-lucide="zap" class="w-7 h-7"></i>
@@ -35,21 +41,22 @@
                         </div>
                     </div>
 
+                    {{-- Completed --}}
                     <div
-                        class="bg-white p-6 rounded-2xl border border-slate-200 shadow-[0_4px_20px_rgb(0,0,0,0.03)] flex items-center gap-5 hover:-translate-y-1 transition-transform duration-300">
+                        class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-5 hover:-translate-y-1 transition-transform duration-300">
                         <div
                             class="w-14 h-14 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shadow-sm">
                             <i data-lucide="check-circle-2" class="w-7 h-7"></i>
                         </div>
                         <div>
                             <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Completed</p>
-                            <p class="text-3xl font-extrabold text-slate-800 mt-1">{{ $completed_briefs_count ?? 0 }}
-                            </p>
+                            <p class="text-3xl font-extrabold text-slate-800 mt-1">{{ $completed_briefs_count ?? 0 }}</p>
                         </div>
                     </div>
 
+                    {{-- Current Sprint --}}
                     <div
-                        class="bg-white p-6 rounded-2xl border border-slate-200 shadow-[0_4px_20px_rgb(0,0,0,0.03)] flex items-center gap-5 hover:-translate-y-1 transition-transform duration-300">
+                        class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-5 hover:-translate-y-1 transition-transform duration-300">
                         <div
                             class="w-14 h-14 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 shadow-sm">
                             <i data-lucide="calendar" class="w-7 h-7"></i>
@@ -64,20 +71,19 @@
                     </div>
                 </div>
 
+                {{-- CURRICULUM SECTION --}}
                 <div>
                     <div class="flex items-center gap-3 mb-6">
                         <h3 class="text-lg font-bold text-slate-800">Your Curriculum</h3>
                         <div class="h-px flex-1 bg-slate-200"></div>
                     </div>
 
-                    @forelse($sprints ?? [] as $sprintGroup)
-                        @php
-                            $sprint = $sprintGroup['sprint'];
-                            $briefsList = $sprintGroup['briefs'];
-                        @endphp
-
+                    {{-- SPRINTS LOOP --}}
+                    @forelse($sprints as $sprint)
                         <div
                             class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-8 group/sprint hover:border-indigo-200 transition-colors">
+
+                            {{-- Sprint Header --}}
                             <div
                                 class="px-6 py-5 border-b border-slate-100 bg-white flex justify-between items-center sticky top-0 z-10">
                                 <div class="flex items-center gap-4">
@@ -86,42 +92,51 @@
                                         S{{ $loop->iteration }}
                                     </div>
                                     <div>
-                                        <h3 class="font-bold text-slate-800 text-lg">{{ $sprint->get_name() }}</h3>
+                                        <h3 class="font-bold text-slate-800 text-lg">{{ $sprint->name }}</h3>
                                         <div class="text-xs font-medium text-slate-500 mt-0.5 flex items-center gap-2">
                                             <i data-lucide="clock" class="w-3 h-3 text-indigo-400"></i>
-                                            Ends {{ date('M d, Y', strtotime($sprint->get_end_date())) }}
+                                            Ends {{ date('M d, Y', strtotime($sprint->end_date)) }}
                                         </div>
                                     </div>
                                 </div>
                                 <span
                                     class="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-50 px-2 py-1 rounded border border-slate-100">
-                                    {{ count($briefsList) }} Projects
+                                    {{ $sprint->briefs->count() }} Projects
                                 </span>
                             </div>
 
+                            {{-- Briefs List --}}
                             <div class="divide-y divide-slate-50 bg-slate-50/30">
-                                @forelse($briefsList as $briefGroup)
+                                @forelse($sprint->briefs as $brief)
                                     @php
-                                        $brief = $briefGroup['brief'];
-                                        $briefCompetences = $briefGroup['competences'];
+                                        // Get the student's submission
+                                        $myLivrable = $brief->livrables->first();
 
-                                        $is_validated =
-                                            property_exists($brief, 'review_status') &&
-                                            !empty($brief->get_review_status());
-                                        $is_submitted = $brief->get_repo_link();
+                                        // Get the student's evaluation (Correction)
+                                        $myEvaluation = $brief->evaluations->first();
 
                                         $status = 'todo';
-                                        if ($is_validated) {
+                                        $repoLink = null;
+                                        $correctionStatus = null;
+
+                                        // 1. Check if Validated (Evaluation exists)
+                                        if ($myEvaluation) {
                                             $status = 'done';
-                                        } elseif ($is_submitted) {
+                                            $correctionStatus = ucfirst($myEvaluation->review); // e.g. "Good", "Excellent"
+                                            $repoLink = $myLivrable->url ?? '#'; // Link from livrable if exists
+                                        }
+                                        // 2. Check if Submitted (Livrable exists but no Evaluation yet)
+                                        elseif ($myLivrable) {
                                             $status = 'submitted';
+                                            $repoLink = $myLivrable->url;
                                         }
                                     @endphp
 
                                     <div
-                                        class="p-6 hover:bg-white hover:shadow-[0_4px_15px_-3px_rgba(0,0,0,0.05)] transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 group/item border-l-4 border-transparent hover:border-l-indigo-500">
+                                        class="p-6 hover:bg-white hover:shadow-sm transition-all flex flex-col md:flex-row md:items-center justify-between gap-6 group/item border-l-4 border-transparent hover:border-l-indigo-500">
 
                                         <div class="flex items-start gap-5 flex-1">
+                                            {{-- Status Icon --}}
                                             <div
                                                 class="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center border shadow-sm transition-colors
                                                     {{ $status == 'done'
@@ -137,9 +152,10 @@
                                                 <div class="flex flex-wrap items-center gap-3 mb-1">
                                                     <h4
                                                         class="text-base font-bold text-slate-800 group-hover/item:text-indigo-700 transition-colors">
-                                                        {{ $brief->get_title() }}
+                                                        {{ $brief->title }}
                                                     </h4>
 
+                                                    {{-- Status Badges --}}
                                                     @if ($status == 'submitted')
                                                         <span
                                                             class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-100 animate-pulse">
@@ -149,8 +165,8 @@
                                                     @elseif($status == 'done')
                                                         <span
                                                             class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                                            <i data-lucide="award" class="w-3 h-3"></i> Validated
-                                                            ({{ ucfirst($brief->review_status ?? 'Good') }})
+                                                            <i data-lucide="award" class="w-3 h-3"></i>
+                                                            {{ $correctionStatus ?? 'Validated' }}
                                                         </span>
                                                     @else
                                                         <span
@@ -166,15 +182,15 @@
                                                 </div>
 
                                                 <p class="text-sm text-slate-500 mb-3 line-clamp-2 leading-relaxed">
-                                                    {{ $brief->get_description() }}
+                                                    {{ $brief->description }}
                                                 </p>
 
                                                 <div class="flex flex-wrap gap-2">
-                                                    @foreach ($briefCompetences as $comp)
+                                                    @foreach ($brief->competences as $comp)
                                                         <span
                                                             class="inline-flex items-center px-2 py-1 rounded text-[10px] font-mono font-bold bg-white text-slate-600 border border-slate-200 shadow-sm"
-                                                            title="{{ $comp->get_libelle() }}">
-                                                            {{ $comp->get_code() }}
+                                                            title="{{ $comp->libelle }}">
+                                                            {{ $comp->code }}
                                                         </span>
                                                     @endforeach
                                                 </div>
@@ -183,15 +199,16 @@
 
                                         <div class="flex items-center gap-3 md:self-center self-end">
                                             @if ($status == 'submitted' || $status == 'done')
-                                                <a href="{{ $brief->get_repo_link() }}" target="_blank"
+                                                <a href="{{ $repoLink }}" target="_blank"
                                                     class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 text-xs font-bold hover:border-indigo-300 hover:text-indigo-600 transition-all shadow-sm group/btn">
                                                     <i data-lucide="github" class="w-4 h-4"></i> View Code
                                                     <i data-lucide="external-link"
                                                         class="w-3 h-3 opacity-0 group-hover/btn:opacity-100 transition-opacity"></i>
                                                 </a>
                                             @else
-                                                <button
-                                                    onclick="openSubmitModal({{ $brief->get_id() }}, '{{ addslashes($brief->get_title()) }}')"
+                                                {{-- Trigger Modal with Data Attributes --}}
+                                                <button onclick="openSubmitModal(this)" data-id="{{ $brief->id }}"
+                                                    data-title="{{ $brief->title }}"
                                                     class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-200 hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center gap-2">
                                                     <i data-lucide="send" class="w-4 h-4"></i> Submit Work
                                                 </button>
@@ -227,6 +244,7 @@
     </div>
     </div>
 
+    {{-- SUBMIT MODAL --}}
     <div id="submitModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeSubmitModal()"></div>
 
@@ -234,7 +252,9 @@
             <div
                 class="pointer-events-auto relative w-full max-w-md bg-white rounded-2xl shadow-2xl ring-1 ring-slate-900/5 overflow-hidden">
 
-                <form action="/student/brief/submit" method="POST">
+                {{-- Update action to RESTful route --}}
+                <form action="/student/briefs/submit" method="POST">
+                    @csrf {{-- CSRF is mandatory --}}
                     <input type="hidden" name="brief_id" id="submit_brief_id">
 
                     <div class="bg-slate-50 border-b border-slate-100 p-6 flex items-center gap-4">
@@ -251,9 +271,8 @@
 
                     <div class="p-6 space-y-5">
                         <div>
-                            <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">
-                                GitHub Repository URL <span class="text-red-500">*</span>
-                            </label>
+                            <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">GitHub
+                                Repository URL <span class="text-red-500">*</span></label>
                             <div class="relative group">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i data-lucide="link"
@@ -266,9 +285,9 @@
                         </div>
 
                         <div>
-                            <label class="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">
-                                Comments (Optional)
-                            </label>
+                            <label
+                                class="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500 ml-1">Comments
+                                (Optional)</label>
                             <div class="relative group">
                                 <textarea name="comment" rows="3" maxlength="255" placeholder="Add any notes about your submission..."
                                     class="w-full rounded-xl border-slate-200 bg-slate-50 p-3 text-sm font-medium shadow-sm focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 focus:outline-none transition-all resize-none"></textarea>
@@ -282,30 +301,30 @@
                     <div
                         class="bg-slate-50 px-6 py-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 border-t border-slate-100">
                         <button type="button" onclick="closeSubmitModal()"
-                            class="w-full sm:w-auto inline-flex justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors">
-                            Cancel
-                        </button>
+                            class="w-full sm:w-auto inline-flex justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors">Cancel</button>
                         <button type="submit"
-                            class="w-full sm:w-auto inline-flex justify-center rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-200 hover:bg-indigo-700 transition-colors">
-                            Submit Project
-                        </button>
+                            class="w-full sm:w-auto inline-flex justify-center rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-200 hover:bg-indigo-700 transition-colors">Submit
+                            Project</button>
                     </div>
                 </form>
             </div>
-        </div>
 
 
-        <script>
-            lucide.createIcons();
+            <script>
+                lucide.createIcons();
 
-            function openSubmitModal(briefId, briefTitle) {
-                document.getElementById('submit_brief_id').value = briefId;
-                document.getElementById('submit_brief_title').textContent = briefTitle;
-                document.getElementById('submitModal').classList.remove('hidden');
-            }
+                function openSubmitModal(button) {
+                    // Use data attributes for cleaner JS
+                    const briefId = button.getAttribute('data-id');
+                    const briefTitle = button.getAttribute('data-title');
 
-            function closeSubmitModal() {
-                document.getElementById('submitModal').classList.add('hidden');
-            }
-        </script>
-    @endsection
+                    document.getElementById('submit_brief_id').value = briefId;
+                    document.getElementById('submit_brief_title').textContent = briefTitle;
+                    document.getElementById('submitModal').classList.remove('hidden');
+                }
+
+                function closeSubmitModal() {
+                    document.getElementById('submitModal').classList.add('hidden');
+                }
+            </script>
+        @endsection

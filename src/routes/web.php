@@ -33,3 +33,4 @@ Route::resource('/teacher/briefs', BriefController::class)->middleware("teacher"
 
 Route::get('/teacher/dashboard', [TeacherDashboardController::class, 'index'])->name('teacher_dashboard')->middleware("teacher");
 Route::get('//student/dashboard', [StudentDashBoardController::class, 'index'])->name('student_dashboard')->middleware('student');
+Route::post('/student/briefs/submit', [StudentDashBoardController::class, 'submit_brief'])->name('submit_brief')->middleware('student');
