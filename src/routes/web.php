@@ -6,6 +6,7 @@ use App\Http\Controllers\BriefController;
 use App\Http\Controllers\ClassesController;
 use App\Http\Controllers\CompetencesController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SprintController;
 use App\Http\Controllers\StudentDashBoardController;
 use App\Http\Controllers\TeacherDashboardController;
@@ -34,3 +35,5 @@ Route::resource('/teacher/briefs', BriefController::class)->middleware("teacher"
 Route::get('/teacher/dashboard', [TeacherDashboardController::class, 'index'])->name('teacher_dashboard')->middleware("teacher");
 Route::get('//student/dashboard', [StudentDashBoardController::class, 'index'])->name('student_dashboard')->middleware('student');
 Route::post('/student/briefs/submit', [StudentDashBoardController::class, 'submit_brief'])->name('submit_brief')->middleware('student');
+
+Route::resource('/student/briefs', ProjectController::class)->middleware('student')->names('project');

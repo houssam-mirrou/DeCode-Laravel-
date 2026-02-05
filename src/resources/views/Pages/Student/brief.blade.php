@@ -1,14 +1,14 @@
 @extends('layout')
 
-@section('title', $brief['brief']->get_title() . ' - Project Details')
+@section('title', $brief->title . ' - Project Details')
 
 @section('content')
-    <div class="flex h-screen bg-slate-50 overflow-hidden font-sans">
-        {{-- HEADER --}}
+    {{-- HEADER --}}
+    <div class="flex flex-col">
         <header
             class="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200/60 flex items-center justify-between px-8 z-10 sticky top-0">
             <div class="flex items-center gap-6">
-                <a href="{{ route('student.dashboard') }}"
+                <a href="{{ route('project.index') }}"
                     class="p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-white border border-transparent hover:border-slate-200 rounded-xl transition-all shadow-sm group">
                     <i data-lucide="arrow-left" class="w-5 h-5 group-hover:-translate-x-0.5 transition-transform"></i>
                 </a>
@@ -169,26 +169,6 @@
                                         </a>
                                     </div>
 
-                                    {{-- Optional: Allow resubmission if not validated yet --}}
-                                    <div class="mt-4 pt-4 border-t border-slate-100 text-center">
-                                        <p class="text-xs text-slate-400 mb-2">Need to update your link?</p>
-                                        <button
-                                            onclick="document.getElementById('resubmit-form').classList.toggle('hidden')"
-                                            class="text-xs font-bold text-indigo-600 hover:underline">
-                                            Submit a new version
-                                        </button>
-                                    </div>
-
-                                    {{-- Resubmit Form (Hidden by default) --}}
-                                    <form id="resubmit-form" action="{{ route('student.submit') }}" method="POST"
-                                        class="hidden mt-4 space-y-3">
-                                        @csrf
-                                        <input type="hidden" name="brief_id" value="{{ $brief->id }}">
-                                        <input type="url" name="repo_link" required placeholder="New URL"
-                                            class="w-full text-xs rounded-lg border-slate-200">
-                                        <button type="submit"
-                                            class="w-full py-2 bg-slate-800 text-white text-xs font-bold rounded-lg">Update</button>
-                                    </form>
                                 </div>
                             </div>
 
@@ -207,7 +187,7 @@
                                         below.</p>
                                 </div>
 
-                                <form action="{{ route('student.submit') }}" method="POST" class="p-6 space-y-5">
+                                <form action="{{ route('project.store') }}" method="POST" class="p-6 space-y-5">
                                     @csrf
                                     <input type="hidden" name="brief_id" value="{{ $brief->id }}">
 
@@ -247,6 +227,7 @@
             </div>
         </main>
     </div>
+
 
     <script>
         lucide.createIcons();

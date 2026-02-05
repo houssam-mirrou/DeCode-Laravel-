@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brief;
+use App\Models\Livrable;
+use App\Models\Sprint;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProjectController extends Controller
 {
@@ -11,7 +15,22 @@ class ProjectController extends Controller
      */
     public function index()
     {
-        return view('Pages.Student.project');
+        $user = Auth::user();
+        $sprints = Sprint::where('class_id', $user->class_id)
+            ->with(['briefs' => function ($query) use ($user) {
+                $query->with([
+                    'competences',
+                    'livrables' => function ($q) use ($user) {
+                        $q->where('student_id', $user->id);
+                    },
+                    'evaluations' => function ($q) use ($user) {
+                        $q->where('student_id', $user->id);
+                    }
+                ]);
+            }])
+            ->orderBy('start_date', 'asc')
+            ->get();
+        return view('Pages.Student.project', compact('sprints'));
     }
 
     /**
@@ -27,7 +46,21 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'brief_id' => 'required|exists:briefs,id',
+            'repo_link' => 'required|url',
+            'comment' => 'required|string'
+        ]);
+        Livrable::create(
+            [
+                'brief_id' => $request->brief_id,
+                'comment' => $request->comment,
+                'student_id' => Auth::user()->id,
+                'url' => $request->repo_link,
+                'submission_date' => now()
+            ]
+        );
+        return redirect()->back()->with('Successfully', 'The livrable being inserted right');
     }
 
     /**
@@ -35,7 +68,20 @@ class ProjectController extends Controller
      */
     public function show(string $id)
     {
-        return view('Pages.Student.brief');
+        $user = Auth::user();
+        $brief = \App\Models\Brief::with([
+            'competences',
+
+            'livrables' => function ($query) use ($user) {
+                $query->where('student_id', $user->id);
+            },
+
+            'evaluations' => function ($query) use ($user) {
+                $query->where('student_id', $user->id);
+            }
+        ])->findOrFail($id);
+        // dd($brief);
+        return view('Pages.Student.brief', compact('brief'));
     }
 
     /**
