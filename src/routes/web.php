@@ -12,6 +12,7 @@ use App\Http\Controllers\SprintController;
 use App\Http\Controllers\StudentDashBoardController;
 use App\Http\Controllers\StudentEvalController;
 use App\Http\Controllers\TeacherDashboardController;
+use App\Http\Controllers\TeacherStudentsController;
 use App\Http\Controllers\UsersController;
 use Illuminate\Support\Facades\Route;
 
@@ -43,3 +44,4 @@ Route::resource('/teacher/evaluations', EvaluationController::class)->middleware
 Route::get('/teacher/evaluate/{brief}/{student}', [EvaluationController::class, 'create'])
     ->name('evaluation.create_custom');
 Route::get('/student/evaluations',[StudentEvalController::class,'index'])->name('student_eval')->middleware('student');
+Route::get('/teacher/students', [TeacherStudentsController::class , 'index'])->name('teacher_students')->middleware('teacher');

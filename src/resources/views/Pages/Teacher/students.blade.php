@@ -4,6 +4,8 @@
 
 @section('content')
 
+
+    {{-- MAIN AREA --}}
     <div class="flex-1 flex flex-col h-screen overflow-hidden relative z-0">
 
         {{-- HEADER --}}
@@ -31,15 +33,21 @@
             </div>
         </header>
 
-        {{-- MAIN GRID --}}
+        {{-- SCROLLABLE CONTENT --}}
         <main class="flex-1 overflow-y-auto p-8 bg-slate-50 scroll-smooth">
 
-            {{-- Success Message --}}
             @if (session('success'))
                 <div
-                    class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl flex items-center gap-3">
+                    class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
                     <i data-lucide="check-circle" class="w-5 h-5"></i>
                     <span class="text-sm font-bold">{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if (isset($error))
+                <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center gap-3">
+                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                    <span class="text-sm font-bold">{{ $error }}</span>
                 </div>
             @endif
 
@@ -49,14 +57,14 @@
                     <div
                         class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-lg hover:border-indigo-200 transition-all duration-300 group relative overflow-hidden">
 
-                        {{-- Hover Effect --}}
+                        {{-- Hover Gradient Strip --}}
                         <div
                             class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity">
                         </div>
 
-                        {{-- Student Info --}}
                         <div class="flex items-start justify-between mb-6">
                             <div class="flex gap-4">
+                                {{-- Initials Avatar --}}
                                 <div
                                     class="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-50 to-indigo-100 border border-indigo-200 flex items-center justify-center text-indigo-600 font-bold text-lg shadow-inner">
                                     {{ $student->initials }}
@@ -85,14 +93,15 @@
                                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Project
                                     Completion</span>
                                 <span class="text-sm font-bold text-indigo-600">
+                                    {{-- Data from withCount in Controller --}}
                                     {{ $student->validated_briefs }}
                                     <span class="text-slate-400 text-[10px] font-normal">/
                                         {{ $totalBriefsCount }}</span>
                                 </span>
                             </div>
 
-                            {{-- Calculate percentage (Prevent division by zero) --}}
                             @php
+                                // Calculate Percentage safely
                                 $percent =
                                     $totalBriefsCount > 0
                                         ? min(100, ($student->validated_briefs / $totalBriefsCount) * 100)
@@ -160,7 +169,7 @@
                         <p class="text-sm text-slate-500 mb-6 pl-11">Register a new student individually or import via CSV.
                         </p>
 
-                        {{-- TABS --}}
+                        {{-- Modal Tabs --}}
                         <div class="flex p-1 space-x-1 bg-slate-100 rounded-xl mb-6">
                             <button onclick="switchTab('manual')" id="tab-manual"
                                 class="flex-1 py-2 text-sm font-bold rounded-lg shadow bg-white text-indigo-600 transition-all">
@@ -172,8 +181,8 @@
                             </button>
                         </div>
 
-                        {{-- MANUAL FORM --}}
-                        <form id="form-manual" action="{{ route('teacher.students.store') }}" method="POST"
+                        {{-- Manual Form --}}
+                        <form id="form-manual" action="" method="POST"
                             class="space-y-5 animate-in fade-in slide-in-from-bottom-2">
                             @csrf
                             <input type="hidden" name="type" value="manual">
@@ -222,8 +231,8 @@
                             </div>
                         </form>
 
-                        {{-- IMPORT FORM --}}
-                        <form id="form-import" action="{{ route('teacher.students.store') }}" method="POST"
+                        {{-- Import Form --}}
+                        <form id="form-import" action="" method="POST"
                             enctype="multipart/form-data"
                             class="space-y-6 hidden animate-in fade-in slide-in-from-bottom-2">
                             @csrf
@@ -241,8 +250,7 @@
                                             class="relative cursor-pointer rounded-md bg-transparent font-bold text-indigo-600 hover:text-indigo-500 focus-within:outline-none">
                                             <span>Click to upload</span>
                                             <input id="file-upload" name="import_file" type="file"
-                                                accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                                                class="sr-only" onchange="showFileName(this)">
+                                                accept=".csv, .txt, .xlsx" class="sr-only" onchange="showFileName(this)">
                                         </label>
                                         <span class="pl-1">or drag and drop</span>
                                     </div>
@@ -277,7 +285,6 @@
             </div>
         </div>
 
-
         <script>
             lucide.createIcons();
 
@@ -296,16 +303,16 @@
                 const formImport = document.getElementById('form-import');
 
                 const activeClass = "bg-white text-indigo-600 shadow";
-                const inactiveClass = "text-slate-500 hover:text-slate-700";
+                const inactiveClass = "text-slate-500 hover:text-slate-700 transition-all";
 
                 if (tab === 'manual') {
-                    btnManual.className = `flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeClass}`;
-                    btnImport.className = `flex-1 py-2 text-sm font-medium rounded-lg transition-all ${inactiveClass}`;
+                    btnManual.className = `flex-1 py-2 text-sm font-bold rounded-lg ${activeClass}`;
+                    btnImport.className = `flex-1 py-2 text-sm font-medium rounded-lg ${inactiveClass}`;
                     formManual.classList.remove('hidden');
                     formImport.classList.add('hidden');
                 } else {
-                    btnImport.className = `flex-1 py-2 text-sm font-bold rounded-lg transition-all ${activeClass}`;
-                    btnManual.className = `flex-1 py-2 text-sm font-medium rounded-lg transition-all ${inactiveClass}`;
+                    btnImport.className = `flex-1 py-2 text-sm font-bold rounded-lg ${activeClass}`;
+                    btnManual.className = `flex-1 py-2 text-sm font-medium rounded-lg ${inactiveClass}`;
                     formImport.classList.remove('hidden');
                     formManual.classList.add('hidden');
                 }

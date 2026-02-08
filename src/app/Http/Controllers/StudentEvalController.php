@@ -8,12 +8,13 @@ use Illuminate\Support\Facades\Auth;
 
 class StudentEvalController extends Controller
 {
-    public function index() {
+    public function index()
+    {
         $evaluations = Evaluation::where('student_id', Auth::user()->id)
-        ->with(['briefs', 'competences'])
-        ->orderBy('created_at', 'desc')
-        ->get();
+            ->with(['briefs', 'competences'])
+            ->orderBy('created_at', 'desc')
+            ->get();
         // dd($evaluations);
-        return view('Pages.Student.evaluations',compact('evaluations'));
+        return view('Pages.Student.evaluations', compact('evaluations'));
     }
 }

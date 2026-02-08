@@ -53,7 +53,7 @@ class User extends Authenticatable
 
     public function teaching_classes()
     {
-        return $this->belongsToMany(Classes::class,'teachers_in_classes','teacher_id','class_id');
+        return $this->belongsToMany(Classes::class, 'teachers_in_classes', 'teacher_id', 'class_id');
     }
 
     public function student_class()
@@ -63,7 +63,7 @@ class User extends Authenticatable
 
     public function briefs_managed()
     {
-        return $this->hasMany(Brief::class,'brief_teachers','teacher_id','brief_id');
+        return $this->hasMany(Brief::class, 'brief_teachers', 'teacher_id', 'brief_id');
     }
 
     public function is_student()
@@ -82,5 +82,20 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function getFullNameAttribute()
+    {
+        return "{$this->first_name} {$this->last_name}";
+    }
+
+    public function getInitialsAttribute()
+    {
+        return strtoupper(substr($this->first_name, 0, 1) . substr($this->last_name, 0, 1));
+    }
+
+    public function evaluations()
+    {
+        return $this->hasMany(Evaluation::class, 'student_id');
     }
 }
